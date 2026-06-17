@@ -86,7 +86,7 @@
     <div id="flipbook"></div>
     <div class="toolbar">
         <button onclick="prevPage()">‹ Əvvəlki</button>
-        <span id="pageInfo">1 /?</span>
+        <span id="pageInfo">Yüklənir...</span>
         <button onclick="nextPage()">Sonrakı ›</button>
         <button onclick="toggleRain()" id="rainBtn">🌧️ Yağmur</button>
     </div>
@@ -106,14 +106,14 @@
         rainSound.volume = 0.3;
 
         document.body.addEventListener('click', () => {
-            if(rainSound.paused) rainSound.play();
+            if(rainSound.paused) rainSound.play().catch(()=>{});
         }, {once: true});
 
         $(document).ready(function() {
-            let pdfDoc = null;
+            // Cache problemi olmasın deyə PDF-ə vaxt əlavə edirik
+            const pdfUrl = './kitab.pdf?v=' + new Date().getTime();
 
-            pdfjsLib.getDocument('kitab.pdf').promise.then(pdf => {
-                pdfDoc = pdf;
+            pdfjsLib.getDocument({ url: pdfUrl }).promise.then(pdf => {
                 const flipbook = $('#flipbook');
                 
                 flipbook.turn({
@@ -140,7 +140,8 @@
 
             }).catch(err => {
                 console.error('PDF yüklənmədi:', err);
-                alert('XƏTA: kitab.pdf tapılmadı! Fayl adını və repoda olduğunu yoxla.');
+                $('#pageInfo').text('XƏTA');
+                alert('XƏTA: kitab.pdf tapılmadı! Linki yoxla: https://tunaozyurt215-eng.github.io/rudy/kitab.pdf');
             });
         });
 
@@ -181,8 +182,8 @@
         }
 
         $(document).keydown(e => {
-            if(e.keyCode == 37) prevPage(); // Sol ox
-            if(e.keyCode == 39) nextPage(); // Sağ ox
+            if(e.keyCode == 37) prevPage();
+            if(e.keyCode == 39) nextPage();
         });
     </script>
 </body>
