@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Uzun Çəkən Sözardı - Çingiz Abdullayev</title>
+    <!-- Favicon 404-ü aradan qaldırır -->
+    <link rel="icon" href="data:,">
     <style>
         body { 
             margin: 0; 
-            background: #000; 
+            background: #1a0000; 
             overflow: hidden; 
             font-family: Arial, sans-serif; 
         }
@@ -18,35 +20,36 @@
             width: 100%; 
             height: 100%;
             background: url('moscow-bg.jpg') center/cover no-repeat;
-            filter: blur(12px) brightness(0.25);
+            filter: blur(15px) brightness(0.2);
             z-index: -1;
         }
         #flipbook {
             width: 90vw; 
             height: 90vh;
             margin: 5vh auto;
-            box-shadow: 0 0 60px rgba(255,0,0,0.5);
+            box-shadow: 0 0 80px rgba(255,0,0,0.6);
         }
         #flipbook .page {
-            background-color: #f8f8f8;
-            /* Moskva şəkli indi səhifənin fonu olacaq */
+            /* BU ƏSAS HİSSƏDİR: Moskva şəkli səhifənin fonu olur */
             background-image: url('moscow-bg.jpg');
             background-size: cover;
             background-position: center;
-            background-blend-mode: overlay; /* Şəklin üstünə ağ rəng qatır ki, yazı oxunsun */
-            border: 1px solid #ccc;
+            /* Şəklin üstünə tünd qırmızı qat ki, yazı oxunsun */
+            background-color: #4a0000;
+            background-blend-mode: multiply;
+            border: 1px solid #600;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            position: relative;
         }
-        /* Yazıların arxasına ağ fon veririk ki, oxunsun */
+        /* PDF səhifəsi - ağ kağız effekti */
         #flipbook .page canvas {
-            max-width: 100%;
-            max-height: 100%;
-            background: rgba(255,255,255,0.88); /* 88% şəffaf ağ fon */
-            padding: 20px;
+            max-width: 95%;
+            max-height: 95%;
+            background: rgba(248,248,248,0.92); /* 92% şəffaf ağ kağız */
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            padding: 15px;
             box-sizing: border-box;
         }
        .toolbar {
@@ -54,37 +57,38 @@
             bottom: 20px; 
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.9); /* Tünd etdim ki, itməsin */
-            backdrop-filter: blur(12px);
+            background: rgba(20,0,0,0.95);
+            backdrop-filter: blur(15px);
             padding: 12px 25px; 
             border-radius: 14px;
-            border: 2px solid rgba(255,0,0,0.6);
+            border: 2px solid #ff0000;
             display: flex; 
             gap: 15px; 
             align-items: center;
-            z-index: 9999; /* Hər şeydən üstdə olsun deyə 9999 etdim */
+            z-index: 999999; /* Düymələr heç vaxt itməyəcək */
         }
        .toolbar button {
-            background: linear-gradient(135deg, #c00, #400);
+            background: linear-gradient(135deg, #c00, #300);
             color: #fff; 
             border: 1px solid #f33;
-            padding: 10px 18px; 
+            padding: 12px 20px; 
             border-radius: 8px; 
             cursor: pointer;
-            font-weight: 600; 
+            font-weight: 700; 
             font-size: 16px;
             transition: 0.2s;
         }
        .toolbar button:hover { 
             background: #e00; 
-            border-color: #fff; 
-            transform: scale(1.05);
+            box-shadow: 0 0 15px #f00;
+            transform: scale(1.08);
         }
         #pageInfo { 
             color: #fff; 
-            font-weight: 600; 
-            min-width: 80px; 
+            font-weight: 700; 
+            min-width: 90px; 
             text-align: center; 
+            font-size: 17px;
         }
     </style>
     
@@ -99,15 +103,15 @@
         <button onclick="prevPage()">‹ Əvvəlki</button>
         <span id="pageInfo">Yüklənir...</span>
         <button onclick="nextPage()">Sonrakı ›</button>
-        <button onclick="toggleRain()" id="rainBtn">🌧️ Yağmur</button>
+        <button onclick="toggleRain()" id="rainBtn">🔇 Səssiz</button>
     </div>
 
-    <!-- İşləyən səs linkləri -->
+    <!-- YENİ, İŞLƏYƏN SƏS LİNKLƏRİ -->
     <audio id="rainSound" loop>
-        <source src="https://cdn.freesound.org/previews/415/415763_6142149-lq.mp3" type="audio/mpeg">
+        <source src="https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg" type="audio/ogg">
     </audio>
     <audio id="flipSound" preload="auto">
-        <source src="https://cdn.freesound.org/previews/270/270404_5123851-lq.mp3" type="audio/mpeg">
+        <source src="https://actions.google.com/sounds/v1/foley/page_turn.ogg" type="audio/ogg">
     </audio>
 
     <script>
@@ -115,9 +119,9 @@
         
         const rainSound = document.getElementById('rainSound');
         const flipSound = document.getElementById('flipSound');
-        rainSound.volume = 0.3;
+        rainSound.volume = 0.4;
 
-        // İstifadəçi ilk klikdə səsləri aktiv et
+        // İlk klikdə səsləri aktiv et - brauzer qaydasıdır
         document.addEventListener('click', () => {
             rainSound.play().then(() => {
                 document.getElementById('rainBtn').innerText = '🌧️ Yağmur';
@@ -145,7 +149,7 @@
                         turning: function(e, page) {
                             // Səhifə çevirmə səsi
                             flipSound.currentTime = 0;
-                            flipSound.volume = 0.6;
+                            flipSound.volume = 0.7;
                             flipSound.play().catch(()=>{});
                             $('#pageInfo').text(page + ' / ' + pdf.numPages);
                         }
