@@ -5,20 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Uzun Çəkən Sözardı - Çingiz Abdullayev</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: Arial, sans-serif; }
-       .bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('moscow-bg.jpg') center/cover no-repeat; filter: blur(12px) brightness(0.25); z-index: -1; }
-        #flipbook { width: 90vw; height: 90vh; margin: 5vh auto; box-shadow: 0 0 60px rgba(255,0,0,0.5); }
-        #flipbook .page { background: #f8f8f8; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        #flipbook .page canvas { max-width: 100%; max-height: 100%; }
-       .toolbar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); padding: 12px 25px; border-radius: 14px; border: 1px solid rgba(255,0,0,0.4); display: flex; gap: 15px; align-items: center; z-index: 100; }
-       .toolbar button { background: linear-gradient(135deg, #8e0e0e, #2a0000); color: #fff; border: 1px solid #550000; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: 0.2s; }
-       .toolbar button:hover { background: #550000; border-color: #ff3333; }
-        #pageInfo { color: #fff; font-weight: 600; min-width: 80px; text-align: center; }
+        body { 
+            margin: 0; 
+            background: #000; 
+            overflow: hidden; 
+            font-family: Arial, sans-serif; 
+        }
+       .bg {
+            position: fixed; 
+            top: 0; 
+            left: 0;
+            width: 100%; 
+            height: 100%;
+            background: url('moscow-bg.jpg') center/cover no-repeat;
+            filter: blur(12px) brightness(0.25);
+            z-index: -1;
+        }
+        #flipbook {
+            width: 90vw; 
+            height: 90vh;
+            margin: 5vh auto;
+            box-shadow: 0 0 60px rgba(255,0,0,0.5);
+        }
+        #flipbook .page {
+            background-color: #f8f8f8;
+            /* Moskva şəkli indi səhifənin fonu olacaq */
+            background-image: url('moscow-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: overlay; /* Şəklin üstünə ağ rəng qatır ki, yazı oxunsun */
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        /* Yazıların arxasına ağ fon veririk ki, oxunsun */
+        #flipbook .page canvas {
+            max-width: 100%;
+            max-height: 100%;
+            background: rgba(255,255,255,0.88); /* 88% şəffaf ağ fon */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+       .toolbar {
+            position: fixed; 
+            bottom: 20px; 
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9); /* Tünd etdim ki, itməsin */
+            backdrop-filter: blur(12px);
+            padding: 12px 25px; 
+            border-radius: 14px;
+            border: 2px solid rgba(255,0,0,0.6);
+            display: flex; 
+            gap: 15px; 
+            align-items: center;
+            z-index: 9999; /* Hər şeydən üstdə olsun deyə 9999 etdim */
+        }
+       .toolbar button {
+            background: linear-gradient(135deg, #c00, #400);
+            color: #fff; 
+            border: 1px solid #f33;
+            padding: 10px 18px; 
+            border-radius: 8px; 
+            cursor: pointer;
+            font-weight: 600; 
+            font-size: 16px;
+            transition: 0.2s;
+        }
+       .toolbar button:hover { 
+            background: #e00; 
+            border-color: #fff; 
+            transform: scale(1.05);
+        }
+        #pageInfo { 
+            color: #fff; 
+            font-weight: 600; 
+            min-width: 80px; 
+            text-align: center; 
+        }
     </style>
     
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/0.11/turn.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://unpkg.com/turn.js@0.11/lib/turn.min.js"></script>
+    <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 </head>
 <body>
     <div class="bg"></div>
@@ -27,25 +99,29 @@
         <button onclick="prevPage()">‹ Əvvəlki</button>
         <span id="pageInfo">Yüklənir...</span>
         <button onclick="nextPage()">Sonrakı ›</button>
-        <button onclick="toggleRain()" id="rainBtn">🔇 Səssiz</button>
+        <button onclick="toggleRain()" id="rainBtn">🌧️ Yağmur</button>
     </div>
 
+    <!-- İşləyən səs linkləri -->
     <audio id="rainSound" loop>
-        <source src="https://www.soundjay.com/nature/sounds/rain-03.mp3" type="audio/mpeg">
+        <source src="https://cdn.freesound.org/previews/415/415763_6142149-lq.mp3" type="audio/mpeg">
     </audio>
     <audio id="flipSound" preload="auto">
-        <source src="https://www.soundjay.com/misc/sounds/page-flip-01.mp3" type="audio/mpeg">
+        <source src="https://cdn.freesound.org/previews/270/270404_5123851-lq.mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
         
         const rainSound = document.getElementById('rainSound');
         const flipSound = document.getElementById('flipSound');
         rainSound.volume = 0.3;
 
-        document.body.addEventListener('click', () => {
-            if(rainSound.paused) rainSound.play().catch(()=>{});
+        // İstifadəçi ilk klikdə səsləri aktiv et
+        document.addEventListener('click', () => {
+            rainSound.play().then(() => {
+                document.getElementById('rainBtn').innerText = '🌧️ Yağmur';
+            }).catch(()=>{});
         }, {once: true});
 
         $(document).ready(function() {
@@ -54,20 +130,20 @@
             pdfjsLib.getDocument({ url: pdfUrl }).promise.then(pdf => {
                 const flipbook = $('#flipbook');
                 
-                // 1. ƏVVƏLCƏ BÜTÜN SƏHİFƏLƏRİ YARAT
                 for(let i = 1; i <= pdf.numPages; i++) {
-                    flipbook.append(`<div class="page" id="page-${i}">Səhifə ${i} yüklənir...</div>`);
+                    flipbook.append(`<div class="page" id="page-${i}"></div>`);
                 }
 
-                // 2. SONRA TURN.JS-İ İŞƏ SAL
                 flipbook.turn({
                     width: flipbook.width(),
                     height: flipbook.height(),
                     autoCenter: true,
                     acceleration: true,
                     gradients: true,
+                    elevation: 50,
                     when: {
                         turning: function(e, page) {
+                            // Səhifə çevirmə səsi
                             flipSound.currentTime = 0;
                             flipSound.volume = 0.6;
                             flipSound.play().catch(()=>{});
@@ -76,7 +152,6 @@
                     }
                 });
 
-                // 3. SƏHİFƏLƏRİ RENDER ET
                 for(let i = 1; i <= pdf.numPages; i++) {
                     renderPage(pdf, i);
                 }
@@ -86,7 +161,7 @@
             }).catch(err => {
                 console.error('PDF yüklənmədi:', err);
                 $('#pageInfo').text('XƏTA');
-                alert('XƏTA: kitab.pdf yüklənə bilmədi! ' + err.message);
+                alert('XƏTA: ' + err.message);
             });
         });
 
@@ -101,10 +176,7 @@
                 
                 page.render({ canvasContext: ctx, viewport: viewport }).promise.then(() => {
                     const pageDiv = document.getElementById('page-' + num);
-                    if(pageDiv) {
-                        pageDiv.innerHTML = '';
-                        pageDiv.appendChild(canvas);
-                    }
+                    if(pageDiv) pageDiv.appendChild(canvas);
                 });
             });
         }
