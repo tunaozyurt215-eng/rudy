@@ -76,7 +76,7 @@ document.body.addEventListener('click', () => {
 
 let pdfDoc = null;
 
-pdfjsLib.getDocument('Çingiz Abdullayev - kitab.pdf').promise.then(pdf=> {
+pdfjsLib.getDocument('kitab.pdf').promise.then(pdf=> {
   pdfDoc = pdf;
   const flipbook = $('#flipbook');
   flipbook.turn({
